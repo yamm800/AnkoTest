@@ -69,51 +69,51 @@ class MyActivityUI() : UiComponent<MainActivity>() {
     val textView: TextView by bindView(textviewId)
 
     val listViewId = View.generateViewId()
-    val listview : ListView by bindView(listViewId)
+    val listview: ListView by bindView(listViewId)
 
-    lateinit var listViewAdapter : MyListViewAdapter
+    lateinit var listViewAdapter: MyListViewAdapter
 
-    override fun createView(ui: AnkoContext<MainActivity>) = with(ui) {
-        relativeLayout {
-            uiRoot = verticalLayout {
-                textView {
-                    id = textviewId
-                    text = userList?.date
-                    textChangedListener {
-                        afterTextChanged {
-                            userList = userList?.copy(it.toString())
-                        }
+    override fun createView(ui: AnkoContext<MainActivity>): View = with(ui) {
+        verticalLayout {
+            textView {
+                id = textviewId
+                text = userList?.date
+                textChangedListener {
+                    afterTextChanged {
+                        userList = userList?.copy(it.toString())
                     }
                 }
-                val name = editText()
-                button("EDIT") {
-                    // Viewを更新
-                    onClick { textView.text = name.text }
-                }
-
-                frameLayout {
-                    id = frameLayoutId
-                    // Fragmentを直書きするとプレビューしてくれなくなる
-//                owner.supportFragmentManager.beginTransaction().replace(id, MainFragment()).commit()
-                }
-
-                verticalLayout {
-                    id = containerId
-                }
-
-                listView {
-                    id = listViewId
-                    listViewAdapter = MyListViewAdapter(ctx, userList)
-                    adapter = listViewAdapter
-                }
             }
+            val name = editText()
+            button("EDIT") {
+                // Viewを更新
+                onClick { textView.text = name.text }
+            }
+
+            frameLayout {
+                id = frameLayoutId
+                // Fragmentを直書きするとプレビューしてくれなくなる
+//                owner.supportFragmentManager.beginTransaction().replace(id, MainFragment()).commit()
+            }
+
+            verticalLayout {
+                id = containerId
+            }
+
+            listView {
+                id = listViewId
+                listViewAdapter = MyListViewAdapter(ctx, userList)
+                adapter = listViewAdapter
+            }
+
+            uiRoot = this
         }
     }
 }
 
 class MyListViewAdapter(var context: Context, var userList: UserList? = null) : BaseAdapter() {
 
-    override fun getItem(position: Int) : User? {
+    override fun getItem(position: Int): User? {
         return userList?.list?.get(position)
     }
 
