@@ -1,6 +1,5 @@
 package yamaguchi.na_s.jp.ankotest.view.view.anko
 
-import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
@@ -16,11 +15,11 @@ import yamaguchi.na_s.jp.ankotest.view.activity.MainActivity
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-fun <T : Activity, V : View> UiComponent<T>.bindView(id: Int): ReadOnlyProperty<AnkoComponent<T>, V>
+fun <T : Context, V : View> UiComponent<T>.bindView(id: Int): ReadOnlyProperty<AnkoComponent<T>, V>
         = required(id, viewFinder)
 
-private val <T : Activity> UiComponent<T>.viewFinder: AnkoComponent<T>.(Int) -> View?
-    get() = { uiRoot.find(it) }
+private val <T : Context> UiComponent<T>.viewFinder: AnkoComponent<T>.(Int) -> View?
+    get() = { root.find(it) }
 
 @Suppress("UNCHECKED_CAST")
 private fun <T, V : View> required(id: Int, finder: T.(Int) -> View?)
@@ -43,16 +42,14 @@ private class Lazy<T, V>(private val initializer: (T, KProperty<*>) -> V) : Read
     }
 }
 
-open abstract class UiComponent<T : Activity> : AnkoComponent<T> {
-    abstract var uiRoot: View
+open abstract class UiComponent<T : Context> : AnkoComponent<T> {
+    lateinit var root: View
 }
 
 /**
  * Created by yamaguchi on 16/07/11.
  */
 class MyActivityUI() : UiComponent<MainActivity>() {
-
-    override lateinit var uiRoot: View
 
     var userList: UserList? by ViewBinder {
         textView.text = userList?.date
@@ -106,7 +103,7 @@ class MyActivityUI() : UiComponent<MainActivity>() {
                 adapter = listViewAdapter
             }
 
-            uiRoot = this
+            root = this
         }
     }
 }
@@ -143,14 +140,19 @@ class MyListViewAdapter(var context: Context, var userList: UserList? = null) : 
     }
 }
 
-class MyListItemUI(var user: User?, var position: Int) : AnkoComponent<Context> {
-    lateinit var label: TextView
+class MyListItemUI(var user: User?, var position: Int) : UiComponent<Context>() {
+
+    val labelId = View.generateViewId()
+    val label : TextView by bindView(labelId)
 
     override fun createView(ui: AnkoContext<Context>) = with(ui) {
         verticalLayout {
-            label = textView {
+            textView {
+                id = labelId
                 text = "List item: " + position
             }
+
+            root = this
         }
     }
 }
