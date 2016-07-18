@@ -15,6 +15,11 @@ import yamaguchi.na_s.jp.ankotest.view.activity.MainActivity
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+inline fun <reified V : View> UiComponent<*>.bind(id: Int): kotlin.Lazy<V> =
+lazy {
+    root.find<V>(id)
+}
+
 fun <T : Context, V : View> UiComponent<T>.bindView(id: Int): ReadOnlyProperty<AnkoComponent<T>, V>
         = required(id, viewFinder)
 
@@ -42,7 +47,19 @@ private class Lazy<T, V>(private val initializer: (T, KProperty<*>) -> V) : Read
     }
 }
 
-open abstract class UiComponent<T : Context> : AnkoComponent<T> {
+// プロパティの名前からViewを取得する
+//private fun <T : Context> UiComponent<T>.findViewByName(name: String): View? =
+//        try {
+//            var c : KClass<UiComponent<T>> = UiComponent<T>::class
+//            c.members.filter { it as KProperty }
+//            val resIds = Class.forName(getPackageName() + ".R\$id")
+//            val resId = resIds.getField(name).get(resIds) as Int
+//            findViewById(resId)
+//        } catch(e: Exception) {
+//            null
+//        }
+
+abstract class UiComponent<T : Context> : AnkoComponent<T> {
     lateinit var root: View
 }
 
@@ -60,10 +77,13 @@ class MyActivityUI() : UiComponent<MainActivity>() {
     val frameLayoutId = View.generateViewId()
 
     val containerId = View.generateViewId()
-    val container: LinearLayout by bindView(containerId)
+    //    val container: LinearLayout by bindView(containerId)
+    val container by lazy {
+        root.find<LinearLayout>(containerId)
+    }
 
     val textviewId = View.generateViewId()
-    val textView: TextView by bindView(textviewId)
+    val textView: TextView by bind(textviewId)
 
     val listViewId = View.generateViewId()
     val listview: ListView by bindView(listViewId)
@@ -143,7 +163,7 @@ class MyListViewAdapter(var context: Context, var userList: UserList? = null) : 
 class MyListItemUI(var user: User?, var position: Int) : UiComponent<Context>() {
 
     val labelId = View.generateViewId()
-    val label : TextView by bindView(labelId)
+    val label: TextView by bindView(labelId)
 
     override fun createView(ui: AnkoContext<Context>) = with(ui) {
         verticalLayout {
