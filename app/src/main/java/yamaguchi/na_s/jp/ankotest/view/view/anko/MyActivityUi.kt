@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import butterknife.bindView
 import org.jetbrains.anko.*
 import yamaguchi.na_s.jp.ankotest.model.user.User
 import yamaguchi.na_s.jp.ankotest.model.user.UserList
@@ -116,7 +117,7 @@ class MyActivityUI() : UiComponent<MainActivity>() {
 
             listView {
                 id = listViewId
-                listViewAdapter = MyListViewAdapter(ctx, userList)
+                listViewAdapter = MyListViewAdapter(owner)
                 adapter = listViewAdapter
             }
 
@@ -125,7 +126,9 @@ class MyActivityUI() : UiComponent<MainActivity>() {
     }
 }
 
-class MyListViewAdapter(var context: Context, var userList: UserList? = null) : BaseAdapter() {
+class MyListViewAdapter(var context: Context) : BaseAdapter() {
+
+    var userList: UserList? = null
 
     override fun getItem(position: Int): User? {
         return userList?.list?.get(position)
@@ -171,12 +174,13 @@ class MyListViewAdapter(var context: Context, var userList: UserList? = null) : 
 
 class MyListItemUI(context: Context) : FrameLayout(context), AnkoComponent<Context> {
 
-    private var label: TextView? = null
+    val labelId = View.generateViewId()
+    val label: TextView by bindView(labelId)
 
     override fun createView(ui: AnkoContext<Context>) = with(ui) {
         verticalLayout {
-            label = textView {
-
+            textView {
+                id = labelId
             }
         }.apply { this@MyListItemUI.addView(this) }
     }
