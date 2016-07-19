@@ -3,10 +3,7 @@ package yamaguchi.na_s.jp.ankotest.view.view.anko
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import org.jetbrains.anko.*
 import yamaguchi.na_s.jp.ankotest.model.user.User
 import yamaguchi.na_s.jp.ankotest.model.user.UserList
@@ -16,9 +13,9 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 inline fun <reified V : View> UiComponent<*>.bind(id: Int): kotlin.Lazy<V> =
-lazy {
-    root.find<V>(id)
-}
+        lazy {
+            root.find<V>(id)
+        }
 
 fun <T : Context, V : View> UiComponent<T>.bindView(id: Int): ReadOnlyProperty<AnkoComponent<T>, V>
         = required(id, viewFinder)
@@ -142,36 +139,46 @@ class MyListViewAdapter(var context: Context, var userList: UserList? = null) : 
         return userList?.list?.size ?: 0
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
-        var newConvertView: View?
-        var ui: MyListItemUI
-
-        if (convertView == null) {
-            ui = MyListItemUI(position)
-            newConvertView = ui.createView(context.UI {  })
-            newConvertView.tag = ui
-        } else {
-            newConvertView = convertView
-            ui = newConvertView.tag as MyListItemUI
-            ui.update(position)
-        }
-
-        newConvertView.tag = ui
-
-        return newConvertView
-    }
+    override fun getView(
+            position: Int, convertView: View?, parent: ViewGroup?): View =
+            ((convertView as? MyListItemUI) ?: MyListItemUI(context).apply {
+                // convertViewが nullの時には Viewを作成
+                createView(context.UI {})
+            }).apply {
+                // Viewを更新
+                update(position)
+            }
 }
 
-class MyListItemUI(var position: Int) : AnkoComponent<Context> {
+//class MyListItemUI(context: Context) : FrameLayout(context) {
+//
+//    private var label: TextView? = null
+//
+//    init {
+//        context.UI {
+//            verticalLayout {
+//                label = textView {
+//
+//                }
+//            }.apply { this@MyListItemUI.addView(this) }
+//        }
+//    }
+//
+//    fun update(position: Int) {
+//        label?.text = "List item: " + position
+//    }
+//}
+
+class MyListItemUI(context: Context) : FrameLayout(context), AnkoComponent<Context> {
 
     private var label: TextView? = null
 
     override fun createView(ui: AnkoContext<Context>) = with(ui) {
         verticalLayout {
             label = textView {
-                text = "List item: " + position
+
             }
-        }
+        }.apply { this@MyListItemUI.addView(this) }
     }
 
     fun update(position: Int) {
