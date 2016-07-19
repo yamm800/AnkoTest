@@ -144,35 +144,54 @@ class MyListViewAdapter(var context: Context, var userList: UserList? = null) : 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         var newConvertView: View?
+        var ui: MyListItemUI
 
         if (convertView == null) {
-            var ui = MyListItemUI(getItem(position), position)
-            newConvertView = ui.createView(context.UI { })
+            ui = MyListItemUI(position)
+            newConvertView = ui.createView(context.UI {  })
             newConvertView.tag = ui
         } else {
             newConvertView = convertView
-            var ui = newConvertView.tag as MyListItemUI
-            ui.label?.text = "List item: " + position
-            newConvertView.tag = ui
+            ui = newConvertView.tag as MyListItemUI
+            ui.update(position)
         }
+
+        newConvertView.tag = ui
 
         return newConvertView
     }
 }
 
-class MyListItemUI(var user: User?, var position: Int) : UiComponent<Context>() {
+class MyListItemUI(var position: Int) : AnkoComponent<Context> {
 
-    val labelId = View.generateViewId()
-    val label: TextView by bindView(labelId)
+    private var label: TextView? = null
 
     override fun createView(ui: AnkoContext<Context>) = with(ui) {
         verticalLayout {
-            textView {
-                id = labelId
+            label = textView {
                 text = "List item: " + position
             }
-
-            root = this
         }
     }
+
+    fun update(position: Int) {
+        label?.text = "List item: " + position
+    }
 }
+
+//class MyListItemUI(var user: User?, var position: Int) : UiComponent<Context>() {
+//
+//    val labelId = View.generateViewId()
+//    val label: TextView by bindView(labelId)
+//
+//    override fun createView(ui: AnkoContext<Context>) = with(ui) {
+//        verticalLayout {
+//            textView {
+//                id = labelId
+//                text = "List item: " + position
+//            }
+//
+//            root = this
+//        }
+//    }
+//}
